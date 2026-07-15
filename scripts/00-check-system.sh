@@ -95,21 +95,41 @@ info() {
 
 check_root() {
 
-    title "CHECK ROOT"
+    title "ROOT VALIDATION"
 
-    if [[ $EUID -eq 0 ]]; then
-        pass "Running as root"
-    else
-        fail "Script harus dijalankan sebagai root"
+    local current_user
+    local current_uid
+    local hostname
 
-        echo
-        echo "Gunakan:"
-        echo
-        echo "sudo ./scripts/00-check-system.sh"
-        echo
+    current_user="$(id -un)"
+    current_uid="$(id -u)"
+    hostname="$(hostname)"
 
-        exit 1
+    info "Current User : ${current_user}"
+    info "Current UID  : ${current_uid}"
+    info "Hostname     : ${hostname}"
+
+    echo
+
+    if [[ "${current_uid}" -eq 0 ]]; then
+
+        pass "Root privilege detected"
+
+        return 0
+
     fi
+
+    fail "Root privilege is required."
+
+    echo
+    echo "Please run one of the following commands:"
+    echo
+    echo "  sudo ./${SCRIPT_NAME}"
+    echo "  sudo bash ./${SCRIPT_NAME}"
+    echo "  sudo -i"
+    echo
+
+    exit 1
 }
 
 ##############################################################################
